@@ -3,25 +3,29 @@ const input = document.querySelector(".search-bar");
 const form = document.getElementById("search-form");
 const helpDialog = document.getElementById("help");
 const closeHelpBtn = document.getElementById("close-help");
-const calcGhostEl = document.getElementById("calc-ghost");
 const calcPanelEl = document.getElementById("calc-panel");
 const quoteDiv = document.getElementById("quote");
 
-// Constants
+// Settings elements
+const settingsBtn = document.getElementById("settings-btn");
+const settingsDialog = document.getElementById("settings");
+const saveSettingsBtn = document.getElementById("save-settings");
+const cancelSettingsBtn = document.getElementById("cancel-settings");
+const resetSettingsBtn = document.getElementById("reset-settings");
+const defaultEngineSelect = document.getElementById("default-engine");
+const placeholdersInput = document.getElementById("placeholders-input");
+const quotesInput = document.getElementById("quotes-input");
+const bookmarksInput = document.getElementById("bookmarks-input");
 
-const engineOrder = ["e", "g", "ddg", "brave", "bing", "w", "yt", "git", "x"];
-let defaultEngine = "e";
-
-// Bookmarks
-const bookmarks = [
+// Default data
+const DEFAULT_BOOKMARKS = [
   {
     cmd: "git me",
     url: "https://github.com/abhinavthedev",
   },
 ];
 
-// Quotes (offline)
-const quotes = [
+const DEFAULT_QUOTES = [
   {
     text: "Be yourself; everyone else is already taken.",
     author: "Oscar Wilde",
@@ -40,13 +44,18 @@ const quotes = [
   },
 ];
 
-// Rotating placeholders (kept subtle)
-const placeholders = [
+const DEFAULT_PLACEHOLDERS = [
   "What are you curious about today?",
   "Discover something new...",
   "Search for answers, not just links...",
   "Type your thoughts and hit enter!",
 ];
+
+// Load from localStorage or use defaults
+let defaultEngine = localStorage.getItem("defaultEngine") || "e";
+let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || JSON.stringify(DEFAULT_BOOKMARKS));
+let quotes = JSON.parse(localStorage.getItem("quotes") || JSON.stringify(DEFAULT_QUOTES));
+let placeholders = JSON.parse(localStorage.getItem("placeholders") || JSON.stringify(DEFAULT_PLACEHOLDERS));
 
 // Engines (still supported via prefixes, no on-screen chrome)
 const engines = {
@@ -65,9 +74,92 @@ const engines = {
 };
 
 /**
+ * Save settings to localStorage
+ */
+function saveSettings() {
+  try {
+    const engine = defaultEngineSelect.value;
+    const placeholderLines = placeholdersInput.value
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+
+    const quoteLines = quotesInput.value
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    const parsedQuotes = quoteLines.map((line) => JSON.parse(line));
+
+    const bookmarkLines = bookmarksInput.value
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean);
+    const parsedBookmarks = bookmarkLines.map((line) => JSON.parse(line));
+
+    // Validate
+    if (placeholderLines.length === 0) throw new Error("Add at least one placeholder");
+    if (parsedQuotes.length === 0) throw new Error("Add at least one quote");
+    if (!parsedQuotes.every((q) => q.text && q.author)) throw new Error("Quotes must have text and author");
+    if (!parsedBookmarks.every((b) => b.cmd && b.url)) throw new Error("Bookmarks must have cmd and url");
+
+    // Save
+    localStorage.setItem("defaultEngine", engine);
+    localStorage.setItem("placeholders", JSON.stringify(placeholderLines));
+    localStorage.setItem("quotes", JSON.stringify(parsedQuotes));
+    localStorage.setItem("bookmarks", JSON.stringify(parsedBookmarks));
+
+    // Update in memory
+    defaultEngine = engine;
+    placeholders = placeholderLines;
+    quotes = parsedQuotes;
+    bookmarks = parsedBookmarks;
+
+    showToast("Settings saved!");
+    settingsDialog.close();
+
+    // Refresh UI
+    renderQuote();
+    setRandomPlaceholder();
+  } catch (err) {
+    showToast(`Error: ${err.message}`);
+  }
+}
+
+/**
+ * Load settings into the dialog
+ */
+function loadSettingsDialog() {
+  defaultEngineSelect.value = defaultEngine;
+  placeholdersInput.value = placeholders.join("\n");
+  quotesInput.value = quotes.map((q) => JSON.stringify(q)).join("\n");
+  bookmarksInput.value = bookmarks.map((b) => JSON.stringify(b)).join("\n");
+}
+
+/**
+ * Reset to defaults
+ */
+function resetSettings() {
+  if (!confirm("Reset all settings to default?")) return;
+
+  localStorage.removeItem("defaultEngine");
+  localStorage.removeItem("placeholders");
+  localStorage.removeItem("quotes");
+  localStorage.removeItem("bookmarks");
+
+  defaultEngine = "e";
+  placeholders = [...DEFAULT_PLACEHOLDERS];
+  quotes = [...DEFAULT_QUOTES];
+  bookmarks = [...DEFAULT_BOOKMARKS];
+
+  loadSettingsDialog();
+  showToast("Settings reset!");
+}
+
+/**
  * Render the quotes in Page
  */
 function renderQuote() {
+  if (quotes.length === 0) return;
   let quoteIndex = Math.floor(Math.random() * quotes.length);
   const q = quotes[quoteIndex];
   if (!quoteDiv) return;
@@ -79,6 +171,7 @@ function renderQuote() {
  * Set Search Bar placeholders
  */
 function setRandomPlaceholder() {
+  if (placeholders.length === 0) return;
   const p = placeholders[Math.floor(Math.random() * placeholders.length)];
   input.setAttribute("placeholder", p);
 }
@@ -261,8 +354,19 @@ calcPanelEl?.addEventListener("click", () => {
     .catch(() => {});
 });
 
+// Settings events
+settingsBtn?.addEventListener("click", () => {
+  loadSettingsDialog();
+  settingsDialog.showModal();
+});
+
+saveSettingsBtn?.addEventListener("click", saveSettings);
+cancelSettingsBtn?.addEventListener("click", () => settingsDialog.close());
+resetSettingsBtn?.addEventListener("click", resetSettings);
+
 window.addEventListener("keydown", (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (settingsDialog?.open || helpDialog?.open) return;
   if (e.key.length !== 1) return;
   input.value += e.key;
   input.focus();
@@ -272,7 +376,9 @@ window.addEventListener("keydown", (e) => {
 // Escape + Help
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
-    if (document.activeElement === input && input.value) {
+    if (settingsDialog?.open) {
+      settingsDialog.close();
+    } else if (document.activeElement === input && input.value) {
       input.value = "";
       maybeCalcPreview("");
     } else if (document.activeElement === input) {

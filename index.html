@@ -12,6 +12,18 @@
   <body>
     <main class="container">
       <section class="search-container">
+        <!-- Settings button -->
+        <button id="settings-btn" class="settings-btn" aria-label="Settings">
+          <svg
+            viewBox="0 -960 960 960"
+            fill="currentColor"
+          >
+            <path
+              d="m370-80-16-128q-13-5-24.5-12T307-235l-119 50L78-375l103-78q-1-7-1-13.5v-27q0-6.5 1-13.5L78-585l110-190 119 50q11-8 23-15t24-12l16-128h220l16 128q13 5 24.5 12t22.5 15l119-50 110 190-103 78q1 7 1 13.5v27q0 6.5-2 13.5l103 78-110 190-118-50q-11 8-23 15t-24 12L590-80H370Zm70-80h79l14-106q31-8 57.5-23.5T639-327l99 41 39-68-86-65q5-14 7-29.5t2-31.5q0-16-2-31.5t-7-29.5l86-65-39-68-99 42q-22-23-48.5-38.5T533-694l-13-106h-79l-14 106q-31 8-57.5 23.5T321-633l-99-41-39 68 86 64q-5 15-7 30t-2 32q0 16 2 31t7 30l-86 65 39 68 99-42q22 23 48.5 38.5T427-266l13 106Zm42-180q58 0 99-41t41-99q0-58-41-99t-99-41q-59 0-99.5 41T342-480q0 58 40.5 99t99.5 41Zm-2-140Z"
+            />
+          </svg>
+        </button>
+
         <!-- Dynamic quote title -->
         <div id="quote" class="quote" aria-live="polite"></div>
 
@@ -27,16 +39,20 @@
               aria-label="Search the web"
               autofocus
             />
-            <!-- removed inline calc ghost -->
-            <!-- <div id="calc-ghost" class="calc-ghost" aria-hidden="true" hidden></div> -->
           </div>
 
           <!-- Separate calc panel -->
-          <output id="calc-panel" class="calc-panel" aria-live="polite" hidden></output>
+          <output
+            id="calc-panel"
+            class="calc-panel"
+            aria-live="polite"
+            hidden
+          ></output>
         </form>
       </section>
     </main>
 
+    <!-- Help Dialog -->
     <dialog id="help" class="help" aria-labelledby="help-title">
       <div class="dialog-content">
         <div class="shortcuts">
@@ -54,13 +70,90 @@
           <h4>Engines & Prefixes</h4>
           <ul>
             <li>Engines: e, g, ddg, brave, bing, w, yt, git, x</li>
-            <li>Force engine: “g query”</li>
-            <li>Site search: “@mdn array methods”, “@so javascript map”, “@npm vite”</li>
-            <li>Calculator: “= 2^10 + 5%”, or “calc (12*3)/5” (Enter copies result)</li>
+            <li>Force engine: "g query"</li>
+            <li>
+              Site search: "@mdn array methods", "@so javascript map", "@npm
+              vite"
+            </li>
+            <li>
+              Calculator: "= 2^10 + 5%", or "calc (12*3)/5" (Enter copies
+              result)
+            </li>
           </ul>
         </div>
       </div>
       <button id="close-help" class="btn">Close</button>
+    </dialog>
+
+    <!-- Settings Dialog -->
+    <dialog
+      id="settings"
+      class="settings-dialog"
+      aria-labelledby="settings-title"
+    >
+      <h2 id="settings-title">Settings</h2>
+
+      <div class="settings-content">
+        <!-- Default Engine -->
+        <section class="settings-section">
+          <h3>Default Search Engine</h3>
+          <select id="default-engine" class="settings-select">
+            <option value="e">Ecosia</option>
+            <option value="g">Google</option>
+            <option value="ddg">DuckDuckGo</option>
+            <option value="brave">Brave</option>
+            <option value="bing">Bing</option>
+          </select>
+        </section>
+
+        <!-- Placeholders -->
+        <section class="settings-section">
+          <h3>Search Placeholders</h3>
+          <textarea
+            id="placeholders-input"
+            class="settings-textarea"
+            rows="4"
+            placeholder="One placeholder per line..."
+          ></textarea>
+          <small>One placeholder per line</small>
+        </section>
+
+        <!-- Quotes -->
+        <section class="settings-section">
+          <h3>Quotes</h3>
+          <textarea
+            id="quotes-input"
+            class="settings-textarea"
+            rows="6"
+            placeholder='{"text": "Your quote", "author": "Author Name"}'
+          ></textarea>
+          <small
+            >JSON format: {"text": "...", "author": "..."}, one per line</small
+          >
+        </section>
+
+        <!-- Bookmarks -->
+        <section class="settings-section">
+          <h3>Bookmarks</h3>
+          <textarea
+            id="bookmarks-input"
+            class="settings-textarea"
+            rows="4"
+            placeholder='{"cmd": "keyword", "url": "https://example.com"}'
+          ></textarea>
+          <small>JSON format: {"cmd": "...", "url": "..."}, one per line</small>
+        </section>
+      </div>
+
+      <div class="settings-actions">
+        <button id="reset-settings" class="btn btn-secondary">
+          Reset to Default
+        </button>
+        <div>
+          <button id="cancel-settings" class="btn btn-secondary">Cancel</button>
+          <button id="save-settings" class="btn btn-primary">Save</button>
+        </div>
+      </div>
     </dialog>
 
     <script src="./script.js"></script>
