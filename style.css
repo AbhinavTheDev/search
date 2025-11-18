@@ -1,0 +1,336 @@
+:root {
+  color-scheme: dark;
+
+  /* Dark palette (no pure black) */
+  --bg: #111111; /* ink blue-black */
+  --muted-bg: #221f1f;
+  --surface: #2c2525; /* card/input */
+  --fg: #eeeeee; /* text */
+  --muted: #222222; /* secondary text */
+  --muted-fg: #b4b4b4;
+  --border: #242b36; /* subtle borders */
+  --accent: #2a2a2a; /* calm teal */
+
+  --radius: 16px;
+  --ring: 0 0 0 4px color-mix(in oklab, var(--accent) 26%, transparent);
+}
+
+/* Base reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+    Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--fg);
+  background: radial-gradient(
+      1100px 800px at 20% 10%,
+      rgba(45, 212, 191, 0.06),
+      transparent 60%
+    ),
+    radial-gradient(
+      1000px 700px at 80% 90%,
+      rgba(59, 130, 246, 0.05),
+      transparent 60%
+    ),
+    var(--bg);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+/* Layout */
+.container {
+  display: grid;
+  place-items: center;
+  width: 97%;
+  height: 95%;
+  border-radius: 1.5rem;
+  background-color: var(--muted-bg);
+}
+
+.search-container {
+  width: min(720px, 92vw);
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+}
+
+/* Search */
+.search {
+  width: 100%;
+}
+
+.search-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.search-bar {
+  width: 100%;
+  height: clamp(50px, 8.5vh, 64px);
+  padding: 0 22px;
+  /* removed extra right padding used by inline ghost */
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: clamp(16px, 2.4vw, 18px);
+  outline: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+    background 160ms ease;
+  font-variant-numeric: normal;
+  caret-color: var(--fg);
+}
+
+.search-bar::placeholder {
+  color: var(--muted-fg);
+}
+
+.search-bar:focus-visible {
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+/* Hide legacy inline ghost (no longer used) */
+.calc-ghost {
+  display: none !important;
+}
+
+/* Separate calc panel */
+.calc-panel {
+  display: none; /* toggled by [hidden] attribute */
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--accent) 12%, var(--surface));
+  color: var(--fg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  transition: background 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, transform 120ms ease;
+}
+.calc-panel:not([hidden]) {
+  display: block;
+}
+.calc-panel:hover {
+  transform: translateY(-1px);
+}
+
+.calc-expr {
+  color: var(--muted-fg);
+  font-size: 13px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calc-out {
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* Hints */
+.hints {
+  text-align: center;
+  color: var(--muted-fg);
+  font-size: 12.5px;
+  letter-spacing: 0.2px;
+}
+
+/* Dialog */
+.help {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+  padding: 16px 18px;
+  width: min(700px, 92vw);        /* a bit wider to avoid cramping */
+  /* max-height: min(70vh, 560px);   prevent overflow/distortion */
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+
+.dialog-content {
+  display: grid;                  /* was flex -> caused squish */
+  grid-template-columns: 1fr;     /* stack by default */
+  gap: 14px;
+  overflow: auto;
+  padding-right: 4px;             /* room for scrollbar */
+}
+
+@media (min-width: 640px) {
+  .dialog-content {
+    grid-template-columns: 1fr; /* two columns on wide screens */
+    row-gap: 12px;
+  }
+}
+
+.dialog-content > hr {
+  grid-column: 1 / -1;           /* full width separator */
+  height: 1px;
+  border: 0;
+  background: var(--border);
+  margin: 2px 0 6px;
+}
+
+/* Section blocks */
+.dialog-content > .shortcuts,
+.dialog-content > .prefix {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;                  /* prevent overflow in grid cell */
+}
+
+.help h2 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+}
+.help h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted-fg);
+}
+
+/* Lists */
+.help ul {
+  margin: 0;
+  padding-left: 1.1em;           /* consistent bullets */
+  line-height: 1.7;
+  color: var(--muted-fg);
+}
+.help li {
+  margin: 0 0 4px 0;
+}
+
+/* Close button aligned to end */
+.help > .btn {
+  display: block;
+  margin: 10px 0 0 auto;
+}
+
+/* Backdrop */
+.help::backdrop {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+/* Button */
+.btn {
+  background: color-mix(in oklab, var(--accent) 14%, var(--surface));
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font: inherit;
+  cursor: pointer;
+  transition: box-shadow 150ms ease, border-color 150ms ease,
+    background 150ms ease;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+  border-color: var(--accent);
+}
+
+/* Visually hidden */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Optional local font */
+@font-face {
+  font-family: "SerifHead";
+  src: url("./fonts/serif-head.woff2") format("woff2");
+  font-display: swap;
+}
+
+.quote {
+  width: 100%;
+  font-family: "SerifHead", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  font-size: clamp(18px, 3.2vw, 28px);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0.3px;
+  text-align: center;
+  color: var(--fg);
+  padding: 4px 12px 10px;
+  opacity: 0.92;
+  user-select: none;
+}
+
+.quote span.author {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.75em;
+  font-style: italic;
+  color: var(--muted-fg);
+}
+
+/* Micro toast (kept minimal) */
+.toast {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 18px;
+  margin-inline: auto;
+  width: fit-content;
+  max-width: 92vw;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--accent) 14%, var(--surface));
+  color: var(--fg);
+  font-size: 13px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 420px) {
+  .search-bar {
+    padding-right: 150px;
+  }
+  .calc-ghost {
+    font-size: clamp(16px, 5vw, 20px);
+  }
+}

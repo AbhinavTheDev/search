@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="./assets/globe.svg" type="image/svg" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0e131b" />
+    <title>Browsy</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <section class="search-container">
+        <!-- Dynamic quote title -->
+        <div id="quote" class="quote" aria-live="polite"></div>
+
+        <form id="search-form" class="search" autocomplete="off" role="search">
+          <div class="search-wrap">
+            <label for="q" class="sr-only">Search</label>
+            <input
+              id="q"
+              type="search"
+              class="search-bar"
+              placeholder="Search the web..."
+              inputmode="search"
+              aria-label="Search the web"
+              autofocus
+            />
+            <!-- removed inline calc ghost -->
+            <!-- <div id="calc-ghost" class="calc-ghost" aria-hidden="true" hidden></div> -->
+          </div>
+
+          <!-- Separate calc panel -->
+          <output id="calc-panel" class="calc-panel" aria-live="polite" hidden></output>
+        </form>
+      </section>
+    </main>
+
+    <dialog id="help" class="help" aria-labelledby="help-title">
+      <div class="dialog-content">
+        <div class="shortcuts">
+          <h2 id="help-title">Shortcuts</h2>
+          <ul>
+            <li>Ctrl/Cmd+K — Focus search</li>
+            <li>Enter — Search / open URL</li>
+            <li>Shift+Enter — Search expression (if calc)</li>
+            <li>Esc — Clear or unfocus</li>
+            <li>? — Toggle this panel</li>
+          </ul>
+        </div>
+        <hr />
+        <div class="prefix">
+          <h4>Engines & Prefixes</h4>
+          <ul>
+            <li>Engines: e, g, ddg, brave, bing, w, yt, git, x</li>
+            <li>Force engine: “g query”</li>
+            <li>Site search: “@mdn array methods”, “@so javascript map”, “@npm vite”</li>
+            <li>Calculator: “= 2^10 + 5%”, or “calc (12*3)/5” (Enter copies result)</li>
+          </ul>
+        </div>
+      </div>
+      <button id="close-help" class="btn">Close</button>
+    </dialog>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
