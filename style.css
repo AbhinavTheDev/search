@@ -484,6 +484,65 @@ body {
   background: color-mix(in oklab, var(--accent) 50%, var(--surface));
 }
 
+/* Lifeline Counter */
+.lifeline-counter {
+  width: 100%;
+  margin-top: 24px;
+  padding: 16px 20px;
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: center;
+  opacity: 0.85;
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+.lifeline-counter:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.lifeline-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-fg);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.lifeline-time {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(8px, 2vw, 16px);
+  flex-wrap: wrap;
+}
+
+.time-segment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 50px;
+}
+
+.time-value {
+  font-size: clamp(20px, 3.5vw, 28px);
+  font-weight: 700;
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.time-unit {
+  font-size: 11px;
+  color: var(--muted-fg);
+  text-transform: lowercase;
+  font-weight: 500;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .settings-btn {
@@ -499,6 +558,15 @@ body {
   
   .search-container {
     padding-top: 36px;
+  }
+
+  .lifeline-counter {
+    padding: 12px 16px;
+    margin-top: 20px;
+  }
+
+  .time-segment {
+    min-width: 45px;
   }
 }
 
@@ -520,5 +588,32 @@ body {
   
   .search-container {
     padding-top: 32px;
+  }
+
+  .lifeline-counter {
+    padding: 10px 12px;
+    margin-top: 16px;
+  }
+
+  .lifeline-label {
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .lifeline-time {
+    gap: 6px;
+  }
+
+  .time-segment {
+    min-width: 40px;
+    gap: 2px;
+  }
+
+  .time-value {
+    font-size: clamp(16px, 4vw, 20px);
+  }
+
+  .time-unit {
+    font-size: 9px;
   }
 }

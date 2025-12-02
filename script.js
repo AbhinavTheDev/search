@@ -17,6 +17,15 @@ const placeholdersInput = document.getElementById("placeholders-input");
 const quotesInput = document.getElementById("quotes-input");
 const bookmarksInput = document.getElementById("bookmarks-input");
 
+// Lifeline counter elements
+const lifelineCounter = document.getElementById("lifeline-counter");
+const yearsEl = document.getElementById("years");
+const monthsEl = document.getElementById("months");
+const daysEl = document.getElementById("days");
+const hoursEl = document.getElementById("hours");
+const minutesEl = document.getElementById("minutes");
+const secondsEl = document.getElementById("seconds");
+
 // Default data
 const DEFAULT_BOOKMARKS = [
   {
@@ -53,9 +62,15 @@ const DEFAULT_PLACEHOLDERS = [
 
 // Load from localStorage or use defaults
 let defaultEngine = localStorage.getItem("defaultEngine") || "e";
-let bookmarks = JSON.parse(localStorage.getItem("bookmarks") || JSON.stringify(DEFAULT_BOOKMARKS));
-let quotes = JSON.parse(localStorage.getItem("quotes") || JSON.stringify(DEFAULT_QUOTES));
-let placeholders = JSON.parse(localStorage.getItem("placeholders") || JSON.stringify(DEFAULT_PLACEHOLDERS));
+let bookmarks = JSON.parse(
+  localStorage.getItem("bookmarks") || JSON.stringify(DEFAULT_BOOKMARKS)
+);
+let quotes = JSON.parse(
+  localStorage.getItem("quotes") || JSON.stringify(DEFAULT_QUOTES)
+);
+let placeholders = JSON.parse(
+  localStorage.getItem("placeholders") || JSON.stringify(DEFAULT_PLACEHOLDERS)
+);
 
 // Engines (still supported via prefixes, no on-screen chrome)
 const engines = {
@@ -97,10 +112,13 @@ function saveSettings() {
     const parsedBookmarks = bookmarkLines.map((line) => JSON.parse(line));
 
     // Validate
-    if (placeholderLines.length === 0) throw new Error("Add at least one placeholder");
+    if (placeholderLines.length === 0)
+      throw new Error("Add at least one placeholder");
     if (parsedQuotes.length === 0) throw new Error("Add at least one quote");
-    if (!parsedQuotes.every((q) => q.text && q.author)) throw new Error("Quotes must have text and author");
-    if (!parsedBookmarks.every((b) => b.cmd && b.url)) throw new Error("Bookmarks must have cmd and url");
+    if (!parsedQuotes.every((q) => q.text && q.author))
+      throw new Error("Quotes must have text and author");
+    if (!parsedBookmarks.every((b) => b.cmd && b.url))
+      throw new Error("Bookmarks must have cmd and url");
 
     // Save
     localStorage.setItem("defaultEngine", engine);
@@ -400,6 +418,66 @@ window.addEventListener("keydown", (e) => {
 });
 
 closeHelpBtn?.addEventListener("click", () => helpDialog.close());
+
+// Birthdate constant - UPDATE THIS WITH YOUR ACTUAL BIRTHDATE
+const BIRTHDATE = new Date("2005-08-12"); // Format: YYYY-MM-DD
+
+/**
+ * Calculate and update lifeline counter
+ */
+function updateLifelineCounter() {
+  const targetAge = 100;
+  const targetDate = new Date(BIRTHDATE);
+  targetDate.setFullYear(BIRTHDATE.getFullYear() + targetAge);
+
+  const now = new Date();
+  const diff = targetDate - now;
+
+  if (diff <= 0) {
+    // Time's up
+    yearsEl.textContent = "0";
+    monthsEl.textContent = "0";
+    daysEl.textContent = "0";
+    hoursEl.textContent = "0";
+    minutesEl.textContent = "0";
+    secondsEl.textContent = "0";
+    return;
+  }
+
+  // Calculate time remaining
+  const seconds = Math.floor((diff / 1000) % 60);
+  const minutes = Math.floor((diff / 1000 / 60) % 60);
+  const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
+  
+  // Calculate days, months, and years more accurately
+  let years = targetDate.getFullYear() - now.getFullYear();
+  let months = targetDate.getMonth() - now.getMonth();
+  let days = targetDate.getDate() - now.getDate();
+
+  // Adjust for negative values
+  if (days < 0) {
+    months--;
+    const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    days += prevMonth.getDate();
+  }
+
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+
+  // Update DOM
+  yearsEl.textContent = years;
+  monthsEl.textContent = months;
+  daysEl.textContent = days;
+  hoursEl.textContent = String(hours).padStart(2, "0");
+  minutesEl.textContent = String(minutes).padStart(2, "0");
+  secondsEl.textContent = String(seconds).padStart(2, "0");
+}
+
+// Start the lifeline counter
+updateLifelineCounter();
+setInterval(updateLifelineCounter, 1000);
 
 setRandomPlaceholder();
 maybeCalcPreview(""); // ensure hidden on load
