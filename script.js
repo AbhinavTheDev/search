@@ -7,15 +7,19 @@ const calcPanelEl = document.getElementById("calc-panel");
 const quoteDiv = document.getElementById("quote");
 
 // Settings elements
+const themeBtn = document.getElementById("theme-btn");
 const settingsBtn = document.getElementById("settings-btn");
 const settingsDialog = document.getElementById("settings");
 const saveSettingsBtn = document.getElementById("save-settings");
 const cancelSettingsBtn = document.getElementById("cancel-settings");
 const resetSettingsBtn = document.getElementById("reset-settings");
 const defaultEngineSelect = document.getElementById("default-engine");
+const themeSelect = document.getElementById("theme-preference");
 const placeholdersInput = document.getElementById("placeholders-input");
 const quotesInput = document.getElementById("quotes-input");
 const bookmarksInput = document.getElementById("bookmarks-input");
+
+let themePreference = localStorage.getItem("themePreference") || "system";
 
 // Lifeline counter elements
 const lifelineCounter = document.getElementById("lifeline-counter");
@@ -35,6 +39,30 @@ const DEFAULT_BOOKMARKS = [
 ];
 
 const DEFAULT_QUOTES = [
+  {
+    text: "Hilbert space is a big place.",
+    author: "Carlton Caves"
+  },
+  {
+    text: "Quantum mechanics: Real Black Magic Calculus",
+    author: "Albert Einstein"
+  },
+  {
+    text: "Life is complex - it has both real and imaginary parts.",
+    author: ""
+  },
+  {
+    text: "All understanding begins with our not accepting the world as it appears.",
+    author: "Alan Kay"
+  },
+  {
+    text: "The most incomprehensible thing about the world is that it is comprehensible.",
+    author: "Albert Einstein"
+  },
+  {
+    text: "I recall that during one walk Einstein suddenly stopped, turned to me and asked whether I really believed that the moon exists only when I look at it. The rest of this walk was devoted to a discussion of what a physicist should mean by the term 'to exist'",
+    author: "Abraham Pais"
+  },
   {
     text: "Be yourself; everyone else is already taken.",
     author: "Oscar Wilde",
@@ -94,6 +122,7 @@ const engines = {
 function saveSettings() {
   try {
     const engine = defaultEngineSelect.value;
+    const theme = themeSelect?.value || "system";
     const placeholderLines = placeholdersInput.value
       .split("\n")
       .map((l) => l.trim())
@@ -122,15 +151,20 @@ function saveSettings() {
 
     // Save
     localStorage.setItem("defaultEngine", engine);
+    localStorage.setItem("themePreference", theme);
     localStorage.setItem("placeholders", JSON.stringify(placeholderLines));
     localStorage.setItem("quotes", JSON.stringify(parsedQuotes));
     localStorage.setItem("bookmarks", JSON.stringify(parsedBookmarks));
 
     // Update in memory
     defaultEngine = engine;
+    themePreference = theme;
     placeholders = placeholderLines;
     quotes = parsedQuotes;
     bookmarks = parsedBookmarks;
+
+    applyTheme(themePreference);
+    updateThemeButton();
 
     showToast("Settings saved!");
     settingsDialog.close();
@@ -148,6 +182,7 @@ function saveSettings() {
  */
 function loadSettingsDialog() {
   defaultEngineSelect.value = defaultEngine;
+  themeSelect.value = themePreference;
   placeholdersInput.value = placeholders.join("\n");
   quotesInput.value = quotes.map((q) => JSON.stringify(q)).join("\n");
   bookmarksInput.value = bookmarks.map((b) => JSON.stringify(b)).join("\n");
@@ -160,15 +195,19 @@ function resetSettings() {
   if (!confirm("Reset all settings to default?")) return;
 
   localStorage.removeItem("defaultEngine");
+  localStorage.removeItem("themePreference");
   localStorage.removeItem("placeholders");
   localStorage.removeItem("quotes");
   localStorage.removeItem("bookmarks");
 
   defaultEngine = "e";
+  themePreference = "system";
   placeholders = [...DEFAULT_PLACEHOLDERS];
   quotes = [...DEFAULT_QUOTES];
   bookmarks = [...DEFAULT_BOOKMARKS];
 
+  applyTheme(themePreference);
+  updateThemeButton();
   loadSettingsDialog();
   showToast("Settings reset!");
 }
@@ -181,7 +220,7 @@ function renderQuote() {
   let quoteIndex = Math.floor(Math.random() * quotes.length);
   const q = quotes[quoteIndex];
   if (!quoteDiv) return;
-  quoteDiv.innerHTML = `${q.text}<span class="author">— ${q.author}</span>`;
+  quoteDiv.innerHTML = `<p>${q.text}</p><cite class="author">— ${q.author}</cite>`;
   document.title = q.text;
 }
 
@@ -205,6 +244,13 @@ function setEngine(key) {
 
 renderQuote();
 setEngine(defaultEngine);
+applyTheme(themePreference);
+updateThemeButton();
+
+const systemMedia = window.matchMedia("(prefers-color-scheme: dark)");
+systemMedia.addEventListener?.("change", () => {
+  if (themePreference === "system") applyTheme("system");
+});
 
 /**
  * Use bookmarks from search bar
@@ -242,9 +288,9 @@ function escapeHTML(s) {
   return s.replace(
     /[&<>"']/g,
     (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[
-        c
-      ])
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[
+      c
+    ])
   );
 }
 
@@ -290,6 +336,50 @@ function maybeCalcPreview(q) {
   }
 }
 
+function applyTheme(pref) {
+  if (!pref) pref = "system";
+  document.documentElement.dataset.theme = pref;
+}
+
+function updateThemeButton() {
+  if (!themeBtn) return;
+  const icons = {
+    system: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+		<path d="M9.173 14.83a4 4 0 1 1 5.657-5.657" />
+		<path d="m11.294 12.707l.174.247a7.5 7.5 0 0 0 8.845 2.492A9 9 0 0 1 5.642 18.36M3 12h1m8-9v1M5.6 5.6l.7.7M3 21L21 3" />
+	</g>
+</svg>`,
+    dark: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="currentColor" d="M12 22c5.523 0 10-4.477 10-10c0-.463-.694-.54-.933-.143a6.5 6.5 0 1 1-8.924-8.924C12.54 2.693 12.463 2 12 2C6.477 2 2 6.477 2 12s4.477 10 10 10" />
+</svg>`,
+    light: `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+	<path d="M0 0h24v24H0z" fill="none" />
+	<path fill="currentColor" d="M18 12a6 6 0 1 1-12 0a6 6 0 0 1 12 0" />
+	<path fill="currentColor" fill-rule="evenodd" d="M12 1.25a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0V2a.75.75 0 0 1 .75-.75M4.399 4.399a.75.75 0 0 1 1.06 0l.393.392a.75.75 0 0 1-1.06 1.061l-.393-.393a.75.75 0 0 1 0-1.06m15.202 0a.75.75 0 0 1 0 1.06l-.393.393a.75.75 0 0 1-1.06-1.06l.393-.393a.75.75 0 0 1 1.06 0M1.25 12a.75.75 0 0 1 .75-.75h1a.75.75 0 0 1 0 1.5H2a.75.75 0 0 1-.75-.75m19 0a.75.75 0 0 1 .75-.75h1a.75.75 0 0 1 0 1.5h-1a.75.75 0 0 1-.75-.75m-2.102 6.148a.75.75 0 0 1 1.06 0l.393.393a.75.75 0 1 1-1.06 1.06l-.393-.393a.75.75 0 0 1 0-1.06m-12.296 0a.75.75 0 0 1 0 1.06l-.393.393a.75.75 0 1 1-1.06-1.06l.392-.393a.75.75 0 0 1 1.061 0M12 20.25a.75.75 0 0 1 .75.75v1a.75.75 0 0 1-1.5 0v-1a.75.75 0 0 1 .75-.75" clip-rule="evenodd" />
+</svg>`,
+  };
+  const labels = {
+    system: "Auto",
+    dark: "Dark",
+    light: "Light",
+  };
+  const label = labels[themePreference] || "Auto";
+  const icon = icons[themePreference] || icons.system;
+  themeBtn.innerHTML = icon.trim();
+  themeBtn.title = `Theme: ${label}`;
+  themeBtn.setAttribute("aria-label", `Theme: ${label}`);
+}
+
+function setThemePreference(pref) {
+  themePreference = pref || "system";
+  localStorage.setItem("themePreference", themePreference);
+  applyTheme(themePreference);
+  updateThemeButton();
+}
+
 function showToast(msg) {
   const el = document.createElement("div");
   el.className = "toast";
@@ -326,7 +416,7 @@ function handleSearch(query, opts = { shiftKey: false }) {
     (calcOut !== null && calcAllowed.test(trimmed));
 
   if (isCalc && calcOut !== null) {
-    navigator.clipboard?.writeText(calcOut).catch(() => {});
+    navigator.clipboard?.writeText(calcOut).catch(() => { });
     showToast(`Copied: ${calcOut}`);
     if (opts.shiftKey) {
       const expr = trimmed.replace(/^=|^calc\s+/i, "");
@@ -369,13 +459,24 @@ calcPanelEl?.addEventListener("click", () => {
   navigator.clipboard
     ?.writeText(lastCalcOut)
     .then(() => showToast(`Copied: ${lastCalcOut}`))
-    .catch(() => {});
+    .catch(() => { });
 });
 
 // Settings events
 settingsBtn?.addEventListener("click", () => {
   loadSettingsDialog();
   settingsDialog.showModal();
+});
+
+themeBtn?.addEventListener("click", () => {
+  const nextTheme =
+    themePreference === "system"
+      ? "dark"
+      : themePreference === "dark"
+        ? "light"
+        : "system";
+  setThemePreference(nextTheme);
+  showToast(`Theme: ${nextTheme === "system" ? "System" : nextTheme}`);
 });
 
 saveSettingsBtn?.addEventListener("click", saveSettings);
@@ -448,7 +549,7 @@ function updateLifelineCounter() {
   const seconds = Math.floor((diff / 1000) % 60);
   const minutes = Math.floor((diff / 1000 / 60) % 60);
   const hours = Math.floor((diff / 1000 / 60 / 60) % 24);
-  
+
   // Calculate days, months, and years more accurately
   let years = targetDate.getFullYear() - now.getFullYear();
   let months = targetDate.getMonth() - now.getMonth();
