@@ -220,7 +220,7 @@ function renderQuote() {
   let quoteIndex = Math.floor(Math.random() * quotes.length);
   const q = quotes[quoteIndex];
   if (!quoteDiv) return;
-  quoteDiv.innerHTML = `<p>${q.text}</p><cite class="author">— ${q.author}</cite>`;
+  quoteDiv.innerHTML = `<p>${q.text}</p><cite class="author">- ${q.author}</cite>`;
   document.title = q.text;
 }
 
